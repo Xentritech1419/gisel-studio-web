@@ -1,0 +1,5 @@
+runtime/site.json
+runtime/admin.json
+runtime/uploads/*
+!runtime/.htaccess
+!runtime/index.html

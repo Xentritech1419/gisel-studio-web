@@ -1,0 +1,38 @@
+{
+  "brand": {
+    "name": "Gisel Studio de Belleza",
+    "city": "Posadas",
+    "mainLogo": "assets/logo-principal-final.webp",
+    "circularLogo": "assets/logo-circular-final.webp",
+    "favicon": "assets/favicon-final.png"
+  },
+  "whatsapp": {
+    "number": "5493764359994",
+    "general": "Hola Gisel Studio de Belleza, quisiera hacer una consulta.",
+    "catalog": "Hola Gisel Studio de Belleza, quisiera consultar por el servicio {name}.",
+    "combo": "Hola Gisel Studio de Belleza, quisiera consultar por el combo {name}."
+  },
+  "socials": [
+    {"id":"instagram","label":"Instagram","icon":"bi-instagram","url":"https://www.instagram.com/giselstudiodebelleza/","enabled":true},
+    {"id":"facebook","label":"Facebook","icon":"bi-facebook","url":"https://www.facebook.com/GiselStudiodeBelleza","enabled":true},
+    {"id":"tiktok","label":"TikTok","icon":"bi-tiktok","url":"","enabled":false},
+    {"id":"maps","label":"Ubicación","icon":"bi-geo-alt-fill","url":"https://maps.app.goo.gl/1TJaywd2Gwg5gGoN6","enabled":true}
+  ],
+  "homeButtons": [
+    {"id":"combos","eyebrow":"Descubrí nuestros","title":"COMBOS ESPECIALES","icon":"bi-stars","type":"link","url":"landings/combos-promos.html","style":"default","enabled":true},
+    {"id":"whatsapp","eyebrow":"Escribinos por","title":"WHATSAPP","icon":"bi-whatsapp","type":"whatsapp","url":"","style":"accent","enabled":true},
+    {"id":"catalogo","eyebrow":"Conocé nuestro","title":"CATÁLOGO","icon":"bi-bag-heart-fill","type":"link","url":"landings/catalogo-servicios.html","style":"default","enabled":true}
+  ],
+  "covers": {
+    "catalog": "assets/portada-catalogo.jpg",
+    "combos": "assets/portada-combos.jpg"
+  },
+  "services": [],
+  "combos": [],
+  "footer": {
+    "catalogTitle": "¿Querés ver nuestras promociones?",
+    "catalogText": "Descubrí los combos especiales de Gisel Studio o consultanos por WhatsApp.",
+    "combosTitle": "¿Buscás un servicio en particular?",
+    "combosText": "Visitá el catálogo completo o escribinos por WhatsApp y te asesoramos."
+  }
+}
