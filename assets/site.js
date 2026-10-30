@@ -71,15 +71,26 @@
     const actions = document.getElementById('home-actions');
     if (actions) {
       actions.innerHTML = '';
-      (config.homeButtons || []).filter(x => x.enabled).forEach(item => {
+      const homeItems = (config.homeButtons || []).filter(x => x.enabled);
+      const order = {combos: 1, catalogo: 2, whatsapp: 3};
+      homeItems.sort((a,b) => (order[a.id] || 50) - (order[b.id] || 50));
+      homeItems.forEach(item => {
         const a = document.createElement('a');
         a.className = `action-card${item.style === 'accent' ? ' action-card--accent' : ''}`;
         const isWa = item.type === 'whatsapp';
         a.href = isWa ? waLink(config, config.whatsapp?.general || '') : linkUrl(item.url);
         if (isWa || /^(https?:)/i.test(item.url || '')) { a.target = '_blank'; a.rel = 'noopener'; }
+        let eyebrow = item.eyebrow || '';
+        let title = item.title || '';
+        if (item.id === 'combos' && eyebrow === 'Descubrí nuestros') eyebrow = 'Elegí el que más va con vos';
+        if (item.id === 'catalogo') {
+          if (eyebrow === 'Conocé nuestro') eyebrow = 'Descubrí todos nuestros servicios';
+          if (title === 'CATÁLOGO') title = 'CATÁLOGO DE SERVICIOS';
+        }
+        if (item.id === 'whatsapp' && eyebrow === 'Escribinos por') eyebrow = 'Consultas y turnos';
         a.innerHTML = `
           <span class="action-icon" aria-hidden="true"><i class="bi ${iconSafe(item.icon)}"></i></span>
-          <span class="action-copy"><small>${esc(item.eyebrow || '')}</small><strong>${esc(item.title || '')}</strong></span>
+          <span class="action-copy"><small>${esc(eyebrow)}</small><strong>${esc(title)}</strong></span>
           <span class="action-arrow" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>`;
         actions.appendChild(a);
       });
