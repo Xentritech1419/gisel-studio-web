@@ -13,15 +13,66 @@
     "combo": "Hola Gisel Studio de Belleza, quisiera consultar por el combo {name}."
   },
   "socials": [
-    {"id":"instagram","label":"Instagram","icon":"bi-instagram","url":"https://www.instagram.com/giselstudiodebelleza/","enabled":true},
-    {"id":"facebook","label":"Facebook","icon":"bi-facebook","url":"https://www.facebook.com/GiselStudiodeBelleza","enabled":true},
-    {"id":"tiktok","label":"TikTok","icon":"bi-tiktok","url":"","enabled":false},
-    {"id":"maps","label":"Ubicación","icon":"bi-geo-alt-fill","url":"https://maps.app.goo.gl/1TJaywd2Gwg5gGoN6","enabled":true}
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "icon": "bi-instagram",
+      "url": "https://www.instagram.com/giselstudiodebelleza/",
+      "enabled": true
+    },
+    {
+      "id": "facebook",
+      "label": "Facebook",
+      "icon": "bi-facebook",
+      "url": "https://www.facebook.com/GiselStudiodeBelleza",
+      "enabled": true
+    },
+    {
+      "id": "tiktok",
+      "label": "TikTok",
+      "icon": "bi-tiktok",
+      "url": "",
+      "enabled": false
+    },
+    {
+      "id": "maps",
+      "label": "Ubicación",
+      "icon": "bi-geo-alt-fill",
+      "url": "https://maps.app.goo.gl/1TJaywd2Gwg5gGoN6",
+      "enabled": true
+    }
   ],
   "homeButtons": [
-    {"id":"combos","eyebrow":"Descubrí nuestros","title":"COMBOS ESPECIALES","icon":"bi-stars","type":"link","url":"landings/combos-promos.html","style":"default","enabled":true},
-    {"id":"whatsapp","eyebrow":"Escribinos por","title":"WHATSAPP","icon":"bi-whatsapp","type":"whatsapp","url":"","style":"accent","enabled":true},
-    {"id":"catalogo","eyebrow":"Conocé nuestro","title":"CATÁLOGO","icon":"bi-bag-heart-fill","type":"link","url":"landings/catalogo-servicios.html","style":"default","enabled":true}
+    {
+      "id": "combos",
+      "eyebrow": "Elegí el que más va con vos",
+      "title": "COMBOS ESPECIALES",
+      "icon": "bi-stars",
+      "type": "link",
+      "url": "landings/combos-promos.html",
+      "style": "default",
+      "enabled": true
+    },
+    {
+      "id": "catalogo",
+      "eyebrow": "Descubrí todos nuestros servicios",
+      "title": "CATÁLOGO DE SERVICIOS",
+      "icon": "bi-bag-heart-fill",
+      "type": "link",
+      "url": "landings/catalogo-servicios.html",
+      "style": "default",
+      "enabled": true
+    },
+    {
+      "id": "whatsapp",
+      "eyebrow": "Consultas y turnos",
+      "title": "WHATSAPP",
+      "icon": "bi-whatsapp",
+      "type": "whatsapp",
+      "url": "",
+      "style": "accent",
+      "enabled": true
+    }
   ],
   "covers": {
     "catalog": "assets/portada-catalogo.jpg",
