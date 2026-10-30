@@ -54,18 +54,21 @@
     const img = document.getElementById('poster-art');
     if (!img) return;
 
-    const version = '20261029-art-v3';
-    const parts = ['1a','c11','c12','c13','c2','c3','1b2','2','3','4'];
-    const urls = parts.map(name => `${base}/assets/home-art-${name}.txt?v=${version}`);
-    const parts = await Promise.all(urls.map(async url => {
+    const version = '20261029-art-v5';
+    const fragmentNames = Array.from({ length: 10 }, (_, i) => String(i + 1).padStart(2, '0'));
+    const urls = fragmentNames.map(name => `${base}/assets/home-v5-${name}.txt?v=${version}`);
+    const fragmentTexts = await Promise.all(urls.map(async url => {
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) throw new Error('No se pudo cargar el diseño del home');
       return (await response.text()).replace(/\s+/g, '');
     }));
 
-    const dataUrl = `data:image/webp;base64,${parts.join('')}`;
+    const dataUrl = `data:image/webp;base64,${fragmentTexts.join('')}`;
     await new Promise((resolve, reject) => {
-      img.onload = () => { img.classList.add('is-loaded'); resolve(); };
+      img.onload = () => {
+        img.classList.add('is-loaded');
+        resolve();
+      };
       img.onerror = () => reject(new Error('No se pudo reconstruir el diseño del home'));
       img.src = dataUrl;
     });
