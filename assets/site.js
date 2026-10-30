@@ -54,44 +54,59 @@
     const socials = document.getElementById('socials');
     if (socials) {
       socials.innerHTML = '';
-      (config.socials || []).filter(x => x.enabled && x.url).forEach(item => {
-        const a = document.createElement('a');
-        a.className = 'social';
-        a.href = item.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.setAttribute('aria-label', item.label || item.id || 'Red social');
-        const i = document.createElement('i');
-        i.className = `bi ${iconSafe(item.icon)}`;
-        a.appendChild(i);
-        socials.appendChild(a);
-      });
+      const allowedSocials = new Set(['instagram','facebook','maps']);
+      (config.socials || [])
+        .filter(item => allowedSocials.has(item.id) && item.enabled && item.url)
+        .forEach(item => {
+          const a = document.createElement('a');
+          a.className = `social social--${item.id}`;
+          a.href = item.url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.setAttribute('aria-label', item.label || item.id || 'Red social');
+          const label = document.createElement('span');
+          label.className = 'sr-only';
+          label.textContent = item.label || item.id || 'Red social';
+          a.appendChild(label);
+          socials.appendChild(a);
+        });
+
+      const maps = (config.socials || []).find(item => item.id === 'maps' && item.enabled && item.url);
+      const bottomMap = document.getElementById('bottom-map-hotspot');
+      if (bottomMap) {
+        if (maps) {
+          bottomMap.href = maps.url;
+          bottomMap.hidden = false;
+        } else {
+          bottomMap.hidden = true;
+        }
+      }
     }
 
     const actions = document.getElementById('home-actions');
     if (actions) {
       actions.innerHTML = '';
-      const homeItems = (config.homeButtons || []).filter(x => x.enabled);
-      const order = {combos: 1, catalogo: 2, whatsapp: 3};
-      homeItems.sort((a,b) => (order[a.id] || 50) - (order[b.id] || 50));
-      homeItems.forEach(item => {
+      const allowedButtons = ['combos','catalogo','whatsapp'];
+      const byId = new Map((config.homeButtons || []).filter(x => x.enabled).map(x => [x.id, x]));
+
+      allowedButtons.forEach(id => {
+        const item = byId.get(id);
+        if (!item) return;
+
         const a = document.createElement('a');
-        a.className = `action-card${item.style === 'accent' ? ' action-card--accent' : ''}`;
-        const isWa = item.type === 'whatsapp';
+        a.className = `action-card action-card--${id}`;
+        const isWa = item.type === 'whatsapp' || id === 'whatsapp';
         a.href = isWa ? waLink(config, config.whatsapp?.general || '') : linkUrl(item.url);
-        if (isWa || /^(https?:)/i.test(item.url || '')) { a.target = '_blank'; a.rel = 'noopener'; }
-        let eyebrow = item.eyebrow || '';
-        let title = item.title || '';
-        if (item.id === 'combos' && eyebrow === 'Descubrí nuestros') eyebrow = 'Elegí el que más va con vos';
-        if (item.id === 'catalogo') {
-          if (eyebrow === 'Conocé nuestro') eyebrow = 'Descubrí todos nuestros servicios';
-          if (title === 'CATÁLOGO') title = 'CATÁLOGO DE SERVICIOS';
+        if (isWa || /^(https?:)/i.test(item.url || '')) {
+          a.target = '_blank';
+          a.rel = 'noopener';
         }
-        if (item.id === 'whatsapp' && eyebrow === 'Escribinos por') eyebrow = 'Consultas y turnos';
-        a.innerHTML = `
-          <span class="action-icon" aria-hidden="true"><i class="bi ${iconSafe(item.icon)}"></i></span>
-          <span class="action-copy"><small>${esc(eyebrow)}</small><strong>${esc(title)}</strong></span>
-          <span class="action-arrow" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>`;
+        a.setAttribute('aria-label', [item.title, item.eyebrow].filter(Boolean).join(' — '));
+
+        const label = document.createElement('span');
+        label.className = 'sr-only';
+        label.textContent = [item.title, item.eyebrow].filter(Boolean).join(' — ');
+        a.appendChild(label);
         actions.appendChild(a);
       });
     }
