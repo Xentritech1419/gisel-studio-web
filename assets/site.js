@@ -50,103 +50,182 @@
     if (fc) fc.textContent = brand.city || '';
   }
 
-  async function loadHomeArtwork() {
-    const img = document.getElementById('poster-art');
-    if (!img) return;
+  const homeLayerArt = {};
 
-    const version = '20261030-home-v6';
-    const fragmentNames = Array.from({ length: 13 }, (_, i) => String(i + 1).padStart(2, '0'));
-    const urls = fragmentNames.map(name => `${base}/assets/home-v6-${name}.txt?v=${version}`);
-    const fragmentTexts = await Promise.all(urls.map(async url => {
-      const response = await fetch(url, { cache: 'no-store' });
-      if (!response.ok) throw new Error('No se pudo cargar el fondo del home');
-      return (await response.text()).replace(/\s+/g, '');
+  async function readPosterFragments(prefix, count, version) {
+    const names = Array.from({length:count}, (_,i)=>String(i+1).padStart(2,'0'));
+    const parts = await Promise.all(names.map(async name => {
+      const response = await fetch(`${base}/assets/${prefix}-${name}.txt?v=${version}`, {cache:'no-store'});
+      if (!response.ok) throw new Error('No se pudo cargar el arte del home');
+      return (await response.text()).replace(/\s+/g,'');
     }));
+    return `data:image/webp;base64,${parts.join('')}`;
+  }
 
-    const dataUrl = `data:image/webp;base64,${fragmentTexts.join('')}`;
-    await new Promise((resolve, reject) => {
-      img.onload = () => { img.classList.add('is-loaded'); resolve(); };
-      img.onerror = () => reject(new Error('No se pudo reconstruir el fondo del home'));
-      img.src = dataUrl;
+  function imageFromDataUrl(dataUrl) {
+    return new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onload=()=>resolve(img);
+      img.onerror=()=>reject(new Error('No se pudo decodificar el arte del home'));
+      img.src=dataUrl;
     });
   }
 
-  function homeIcon(id) {
-    const icons = {
-      instagram: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>',
-      facebook: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.7 21v-8h2.8l.4-3h-3.2V8.1c0-.9.3-1.5 1.6-1.5H17V4a22 22 0 0 0-2.4-.2c-2.4 0-4 1.4-4 4.1V10H8v3h2.6v8h3.1z"/></svg>',
-      tiktok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.6 3c.4 2.3 1.7 3.8 4.1 4.2v3.2a8.7 8.7 0 0 1-4.1-1.2v6.1a5.8 5.8 0 1 1-5-5.7v3.3a2.6 2.6 0 1 0 1.8 2.4V3h3.2z"/></svg>',
-      maps: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-6.4 6-12A6 6 0 0 0 6 9c0 5.6 6 12 6 12z"/><circle cx="12" cy="9" r="2.2"/></svg>',
-      combos: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17c2.2-5 3.9-8.2 5-9.5.8-1 1.6-.5 1.4.6l-1 4.2 2.5-5.9c.5-1.1 1.5-.8 1.3.4l-1 5.1 2.4-5c.5-1 1.4-.7 1.2.4l-1 5.3 2-3.5c.6-1 1.4-.4 1 .7l-2.1 6.4c-.8 2.5-2.3 3.8-4.7 4.3-3.5.7-6.7-.7-7-3.5z"/></svg>',
-      catalogo: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20c-3-2.1-4.7-4.2-5-6.4 2.4-.1 4.2.6 5 2.2.8-1.6 2.6-2.3 5-2.2-.3 2.2-2 4.3-5 6.4z"/><path d="M12 15.8c-2.1-2.3-2.8-4.7-2-7.2 1.3.5 2.2 1.4 2 2.8-.2-1.4.7-2.3 2-2.8.8 2.5.1 4.9-2 7.2z"/><path d="M7 13.6c-2.2-.3-3.7-1.3-4.6-3 2.6-.7 4.7 0 6.1 2"/><path d="M17 13.6c2.2-.3 3.7-1.3 4.6-3-2.6-.7-4.7 0-6.1 2"/></svg>',
-      whatsapp: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.6a8 8 0 0 1-11.8 7l-4.2 1.1 1.1-4A8 8 0 1 1 20 11.6z"/><path d="M8.7 7.8c.4-.4.9-.3 1.1.2l.8 1.8c.2.4.1.7-.2 1l-.6.6c.8 1.7 2 2.8 3.6 3.6l.7-.7c.3-.3.6-.4 1-.2l1.7.8c.5.2.6.7.3 1.1-.7.9-1.7 1.3-2.9 1-3.8-.8-6.5-3.5-7.3-7.3-.3-1.1.2-2.2 1.8-1.9z"/></svg>'
-    };
-    return icons[id] || icons.catalogo;
+  function roundedRectPath(ctx,x,y,w,h,r) {
+    const rr=Math.min(r,w/2,h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+rr,y);
+    ctx.arcTo(x+w,y,x+w,y+h,rr);
+    ctx.arcTo(x+w,y+h,x,y+h,rr);
+    ctx.arcTo(x,y+h,x,y,rr);
+    ctx.arcTo(x,y,x+w,y,rr);
+    ctx.closePath();
+  }
+
+  function cropPoster(source, box, shape='round') {
+    const [x1,y1,x2,y2]=box;
+    const sx=x1/1024*source.naturalWidth;
+    const sy=y1/1536*source.naturalHeight;
+    const sw=(x2-x1)/1024*source.naturalWidth;
+    const sh=(y2-y1)/1536*source.naturalHeight;
+    const outW=Math.max(2,Math.round(sw*2));
+    const outH=Math.max(2,Math.round(sh*2));
+    const canvas=document.createElement('canvas');
+    canvas.width=outW; canvas.height=outH;
+    const ctx=canvas.getContext('2d');
+    ctx.save();
+    if(shape==='circle'){
+      ctx.beginPath();
+      ctx.arc(outW/2,outH/2,Math.min(outW,outH)/2-1,0,Math.PI*2);
+      ctx.clip();
+    }else{
+      roundedRectPath(ctx,1,1,outW-2,outH-2,outH*.48);
+      ctx.clip();
+    }
+    ctx.drawImage(source,sx,sy,sw,sh,0,0,outW,outH);
+    ctx.restore();
+    return canvas.toDataURL('image/webp',.94);
+  }
+
+  function createTikTokArt(size=180) {
+    const canvas=document.createElement('canvas');
+    canvas.width=size; canvas.height=size;
+    const ctx=canvas.getContext('2d');
+    const g=ctx.createLinearGradient(size*.18,size*.12,size*.84,size*.9);
+    g.addColorStop(0,'#f2b29b');
+    g.addColorStop(.42,'#ce6c59');
+    g.addColorStop(1,'#983144');
+    ctx.beginPath();
+    ctx.arc(size/2,size/2,size*.48,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+    ctx.lineWidth=size*.025;
+    ctx.strokeStyle='rgba(255,224,205,.95)';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(size/2,size/2,size*.43,0,Math.PI*2);
+    ctx.lineWidth=size*.012;
+    ctx.strokeStyle='rgba(255,247,239,.55)';
+    ctx.stroke();
+
+    ctx.strokeStyle='#fff8f3';
+    ctx.fillStyle='#fff8f3';
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+    ctx.lineWidth=size*.09;
+    ctx.beginPath();
+    ctx.moveTo(size*.56,size*.30);
+    ctx.lineTo(size*.56,size*.63);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(size*.56,size*.31);
+    ctx.quadraticCurveTo(size*.67,size*.40,size*.76,size*.40);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(size*.43,size*.68,size*.16,0,Math.PI*2);
+    ctx.stroke();
+    return canvas.toDataURL('image/webp',.95);
+  }
+
+  async function loadHomeArtwork() {
+    const img=document.getElementById('poster-art');
+    if(!img) return;
+    const dataUrl=await readPosterFragments('home-v6',13,'20261030-base-v6');
+    await new Promise((resolve,reject)=>{
+      img.onload=()=>{img.classList.add('is-loaded');resolve();};
+      img.onerror=()=>reject(new Error('No se pudo reconstruir el fondo del home'));
+      img.src=dataUrl;
+    });
+  }
+
+  async function loadHomeLayerArt() {
+    const sourceUrl=await readPosterFragments('home-v5',10,'20261029-original-v5');
+    const source=await imageFromDataUrl(sourceUrl);
+    homeLayerArt.combos=cropPoster(source,[157,892,867,1035]);
+    homeLayerArt.catalogo=cropPoster(source,[157,1050,867,1194]);
+    homeLayerArt.whatsapp=cropPoster(source,[157,1207,867,1352]);
+    homeLayerArt.instagram=cropPoster(source,[346,792,434,880],'circle');
+    homeLayerArt.facebook=cropPoster(source,[469,792,557,880],'circle');
+    homeLayerArt.maps=cropPoster(source,[592,792,680,880],'circle');
+    homeLayerArt.tiktok=createTikTokArt();
   }
 
   function renderHome(config) {
-    const socials = document.getElementById('socials');
-    const socialOrder = ['instagram','facebook','tiktok','maps'];
-    if (socials) {
-      socials.innerHTML = '';
-      const byId = new Map((config.socials || []).map(item => [item.id, item]));
-      socialOrder.forEach(id => {
-        const item = byId.get(id) || { id, label: id === 'maps' ? 'Ubicación' : id, url: '', enabled: false };
-        const active = !!(item.enabled && item.url);
-        const a = document.createElement('a');
-        a.className = `social social--${id}${active ? '' : ' is-disabled'}`;
-        a.href = active ? item.url : '#';
-        a.setAttribute('aria-label', item.label || id);
-        if (active) {
-          a.target = '_blank';
-          a.rel = 'noopener';
-        } else {
-          a.setAttribute('aria-disabled','true');
-          a.addEventListener('click', event => event.preventDefault());
-        }
-        a.innerHTML = homeIcon(id) + `<span class="sr-only">${esc(item.label || id)}</span>`;
+    const socials=document.getElementById('socials');
+    const socialOrder=['instagram','facebook','tiktok','maps'];
+    if(socials){
+      socials.innerHTML='';
+      const byId=new Map((config.socials||[]).map(item=>[item.id,item]));
+      socialOrder.forEach(id=>{
+        const item=byId.get(id)||{id,label:id==='maps'?'Ubicación':id,url:'',enabled:false};
+        const active=!!(item.enabled&&item.url);
+        const a=document.createElement('a');
+        a.className=`social social--${id}${active?'':' is-disabled'}`;
+        a.href=active?item.url:'#';
+        a.setAttribute('aria-label',item.label||id);
+        if(active){a.target='_blank';a.rel='noopener';}
+        else{a.setAttribute('aria-disabled','true');a.addEventListener('click',e=>e.preventDefault());}
+        const art=document.createElement('img');
+        art.src=homeLayerArt[id]||'';
+        art.alt='';
+        a.appendChild(art);
+        const label=document.createElement('span');
+        label.className='sr-only';
+        label.textContent=item.label||id;
+        a.appendChild(label);
         socials.appendChild(a);
       });
 
-      const maps = byId.get('maps');
-      const bottomMap = document.getElementById('bottom-map-hotspot');
-      if (bottomMap) {
-        const activeMap = !!(maps && maps.enabled && maps.url);
-        bottomMap.href = activeMap ? maps.url : '#';
-        bottomMap.hidden = !activeMap;
+      const maps=byId.get('maps');
+      const bottomMap=document.getElementById('bottom-map-hotspot');
+      if(bottomMap){
+        const activeMap=!!(maps&&maps.enabled&&maps.url);
+        bottomMap.href=activeMap?maps.url:'#';
+        bottomMap.hidden=!activeMap;
       }
     }
 
-    const actions = document.getElementById('home-actions');
-    if (actions) {
-      actions.innerHTML = '';
-      const allowedButtons = ['combos','catalogo','whatsapp'];
-      const defaults = {
-        combos: {title:'COMBOS ESPECIALES',eyebrow:'Elegí el que más va con vos',url:'landings/combos-promos.html',type:'link'},
-        catalogo: {title:'CATÁLOGO DE SERVICIOS',eyebrow:'Descubrí todos nuestros servicios',url:'landings/catalogo-servicios.html',type:'link'},
-        whatsapp: {title:'WHATSAPP',eyebrow:'Consultas y turnos',url:'',type:'whatsapp'}
+    const actions=document.getElementById('home-actions');
+    if(actions){
+      actions.innerHTML='';
+      const defaults={
+        combos:{title:'COMBOS ESPECIALES',eyebrow:'Elegí el que más va con vos',url:'landings/combos-promos.html',type:'link'},
+        catalogo:{title:'CATÁLOGO DE SERVICIOS',eyebrow:'Descubrí todos nuestros servicios',url:'landings/catalogo-servicios.html',type:'link'},
+        whatsapp:{title:'WHATSAPP',eyebrow:'Consultas y turnos',url:'',type:'whatsapp'}
       };
-      const byId = new Map((config.homeButtons || []).map(x => [x.id, x]));
-
-      allowedButtons.forEach(id => {
-        const item = { ...defaults[id], ...(byId.get(id) || {}) };
-        if (item.enabled === false) return;
-        const a = document.createElement('a');
-        a.className = `action-card action-card--${id}`;
-        const isWa = item.type === 'whatsapp' || id === 'whatsapp';
-        a.href = isWa ? waLink(config, config.whatsapp?.general || '') : linkUrl(item.url);
-        if (isWa || /^(https?:)/i.test(item.url || '')) {
-          a.target = '_blank';
-          a.rel = 'noopener';
-        }
-        a.setAttribute('aria-label', [item.title, item.eyebrow].filter(Boolean).join(' — '));
-        a.innerHTML = `
-          <span class="action-icon">${homeIcon(id)}</span>
-          <span class="action-copy">
-            <span class="action-title">${esc(item.title || '')}</span>
-            <span class="action-eyebrow">${esc(item.eyebrow || '')}</span>
-          </span>
-          <span class="action-arrow" aria-hidden="true"></span>`;
+      const byId=new Map((config.homeButtons||[]).map(x=>[x.id,x]));
+      ['combos','catalogo','whatsapp'].forEach(id=>{
+        const item={...defaults[id],...(byId.get(id)||{})};
+        if(item.enabled===false)return;
+        const a=document.createElement('a');
+        a.className=`action-card action-card--${id}`;
+        const isWa=item.type==='whatsapp'||id==='whatsapp';
+        a.href=isWa?waLink(config,config.whatsapp?.general||''):linkUrl(item.url);
+        if(isWa||/^(https?:)/i.test(item.url||'')){a.target='_blank';a.rel='noopener';}
+        a.setAttribute('aria-label',[item.title,item.eyebrow].filter(Boolean).join(' — '));
+        const art=document.createElement('img');
+        art.src=homeLayerArt[id]||'';
+        art.alt='';
+        a.appendChild(art);
         actions.appendChild(a);
       });
     }
@@ -209,7 +288,7 @@
   }
 
   async function load() {
-    const artworkPromise = page === 'home' ? loadHomeArtwork() : Promise.resolve();
+    const artworkPromise = page === 'home' ? Promise.all([loadHomeArtwork(), loadHomeLayerArt()]) : Promise.resolve();
     try {
       const response = await fetch(`${base}/api/content.php?v=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('No se pudo cargar la configuración');
