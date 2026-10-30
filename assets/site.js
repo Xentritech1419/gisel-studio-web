@@ -50,6 +50,26 @@
     if (fc) fc.textContent = brand.city || '';
   }
 
+  async function loadHomeArtwork() {
+    const img = document.getElementById('poster-art');
+    if (!img) return;
+
+    const version = '20261029-art-v2';
+    const urls = [1,2,3,4].map(n => `${base}/assets/home-art-${n}.txt?v=${version}`);
+    const parts = await Promise.all(urls.map(async url => {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('No se pudo cargar el diseño del home');
+      return (await response.text()).replace(/\s+/g, '');
+    }));
+
+    const dataUrl = `data:image/webp;base64,${parts.join('')}`;
+    await new Promise((resolve, reject) => {
+      img.onload = () => { img.classList.add('is-loaded'); resolve(); };
+      img.onerror = () => reject(new Error('No se pudo reconstruir el diseño del home'));
+      img.src = dataUrl;
+    });
+  }
+
   function renderHome(config) {
     const socials = document.getElementById('socials');
     if (socials) {
@@ -169,12 +189,16 @@
   }
 
   async function load() {
+    const artworkPromise = page === 'home' ? loadHomeArtwork() : Promise.resolve();
     try {
       const response = await fetch(`${base}/api/content.php?v=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('No se pudo cargar la configuración');
       const config = await response.json();
       applyBrand(config);
-      if (page === 'home') renderHome(config);
+      if (page === 'home') {
+        await artworkPromise;
+        renderHome(config);
+      }
       if (page === 'catalog') renderCatalog(config);
       if (page === 'combos') renderCombos(config);
     } catch (error) {
