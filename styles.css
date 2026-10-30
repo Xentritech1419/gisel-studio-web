@@ -99,7 +99,8 @@ body{
 .poster-socials .social--facebook svg,
 .poster-socials .social--tiktok svg{fill:currentColor;stroke:none}
 .poster-socials .social.is-disabled{
-  opacity:.58;
+  opacity:1;
+  cursor:default;
 }
 .poster-socials .social.is-disabled::before{
   content:"";
@@ -107,7 +108,7 @@ body{
   inset:0;
 }
 @media(hover:hover){
-  .poster-socials .social:not(.is-disabled):hover{
+  .poster-socials .social:hover{
     transform:translateY(-7%) scale(1.09);
     filter:saturate(1.08) brightness(1.06);
     box-shadow:
@@ -116,7 +117,7 @@ body{
       0 11px 20px rgba(107,36,46,.28),
       0 0 18px rgba(229,164,118,.25);
   }
-  .poster-socials .social:not(.is-disabled):hover::after{left:125%}
+  .poster-socials .social:hover::after{left:125%}
 }
 
 /* BOTONES */
