@@ -54,8 +54,9 @@
     const img = document.getElementById('poster-art');
     if (!img) return;
 
-    const version = '20261029-art-v2';
-    const urls = [1,2,3,4].map(n => `${base}/assets/home-art-${n}.txt?v=${version}`);
+    const version = '20261029-art-v3';
+    const parts = ['1a','c11','c12','c13','c2','c3','1b2','2','3','4'];
+    const urls = parts.map(name => `${base}/assets/home-art-${name}.txt?v=${version}`);
     const parts = await Promise.all(urls.map(async url => {
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) throw new Error('No se pudo cargar el diseño del home');
