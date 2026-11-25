@@ -35,6 +35,16 @@
     if (el && path) el.src = assetUrl(path);
   }
 
+  function setCoverImage(id, path) {
+    const el = document.getElementById(id);
+    if (!el || !path) return;
+    el.classList.remove('is-loaded');
+    el.onload = () => el.classList.add('is-loaded');
+    el.onerror = () => el.classList.remove('is-loaded');
+    el.src = assetUrl(path);
+    if (el.complete && el.naturalWidth > 0) el.classList.add('is-loaded');
+  }
+
   function applyBrand(config) {
     const brand = config.brand || {};
     const fav = document.getElementById('site-favicon');
@@ -252,7 +262,7 @@
   }
 
   function renderCatalog(config) {
-    setImage('catalog-cover', config.covers?.catalog);
+    setCoverImage('catalog-cover', config.covers?.catalog);
     const grid = document.getElementById('services-grid');
     const empty = document.getElementById('services-empty');
     const items = (config.services || []).filter(x => x.enabled !== false);
@@ -270,7 +280,7 @@
   }
 
   function renderCombos(config) {
-    setImage('combos-cover', config.covers?.combos);
+    setCoverImage('combos-cover', config.covers?.combos);
     const grid = document.getElementById('combos-grid');
     const empty = document.getElementById('combos-empty');
     const items = (config.combos || []).filter(x => x.enabled !== false);
