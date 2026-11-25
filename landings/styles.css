@@ -100,7 +100,11 @@ body::before{
 }
 .cover-image{
   width:100%;
+  aspect-ratio:3 / 1;
+  object-fit:cover;
   display:block;
+  opacity:0;
+  transition:opacity .18s ease;
   border-radius:28px;
   border:2px solid transparent;
   background:
@@ -108,8 +112,9 @@ body::before{
     linear-gradient(120deg,#f4e0a6,#be7a18,#fff0b4,#a95d13,#efd07f) border-box;
   box-shadow:0 18px 38px rgba(92,29,47,.15);
 }
+.cover-image.is-loaded{opacity:1}
 .section{
-  padding:38px 34px 46px;
+  padding:24px 34px 46px;
   position:relative;
 }
 .section::before{
@@ -337,7 +342,7 @@ body::before{
   .mini-nav a{font-size:12px;padding:8px 10px}
   .cover-wrap{padding:12px 12px 0}
   .cover-image{border-radius:18px}
-  .section{padding:28px 14px 34px}
+  .section{padding:20px 14px 34px}
   .section-script{font-size:32px}
   .section-head h1{font-size:clamp(36px,11vw,50px)}
   .product-grid{grid-template-columns:1fr}
