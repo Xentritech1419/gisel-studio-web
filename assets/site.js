@@ -38,11 +38,7 @@
   function setCoverImage(id, path) {
     const el = document.getElementById(id);
     if (!el || !path) return;
-    el.classList.remove('is-loaded');
-    el.onload = () => el.classList.add('is-loaded');
-    el.onerror = () => el.classList.remove('is-loaded');
     el.src = assetUrl(path);
-    if (el.complete && el.naturalWidth > 0) el.classList.add('is-loaded');
   }
 
   function applyBrand(config) {
